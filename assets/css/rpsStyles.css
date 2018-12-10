@@ -1,0 +1,27 @@
+html,
+body {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+.container-fluid {
+  min-height: calc(100% - 55px);
+}
+#instructionsList {
+  list-style-type: none;
+}
+.col {
+  height: 60vh;
+  max-width: 33.3%;
+}
+#messages {
+  overflow: scroll;
+  overflow-x: hidden;
+  max-height: 54vh;
+}
+.text-wrap {
+  max-width: 60%;
+}
+.p2 {
+  margin-left: calc(100% - 60%);
+}
