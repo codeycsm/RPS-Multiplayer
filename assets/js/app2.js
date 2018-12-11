@@ -242,4 +242,6 @@ function leaveGame() {
   $("#rpsGame").hide();
   $("#header button, #header h1").hide();
   $("#instructions").show();
+  // Refreshes page when player clicks the leave game button.
+  location.reload();
 }
