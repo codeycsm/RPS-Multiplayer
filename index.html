@@ -64,7 +64,18 @@
         </div>
       </nav>
       <!-- Rock, Paper, Scisors content -->
-      <h1 class="text-center mb-3">Rock Paper Scissors... Shoot!!!</h1>
+      <div id="header" class="d-flex flex-row justify-content-between">
+        <h1 class="text-center mb-3 ml-2">Rock Paper Scissors... Shoot!!!</h1>
+        <button
+          id="leaveGame"
+          type="button"
+          class="btn btn-primary mr-2 px-1 align-self-center"
+          onclick="leaveGame()"
+        >
+          Leave Game
+        </button>
+      </div>
+
       <div id="instructions" class="row">
         <!-- instructions about the game with user name input -->
         <div
@@ -142,8 +153,9 @@
               </div>
             </div>
           </div>
-
-          <h1 id="player1Choice" class="align-items-middle text-center"></h1>
+          <div id="player1ChoiceContainer">
+            <h1 id="player1Choice" class="align-items-middle text-center"></h1>
+          </div>
           <div
             id="player1Options"
             class="d-flex flex-row justify-content-between"
@@ -172,8 +184,9 @@
               </div>
             </div>
           </div>
-
-          <h1 id="player2Choice" class="align-items-middle text-center"></h1>
+          <div id="player2ChoiceContainer">
+            <h1 id="player2Choice" class="align-items-middle text-center"></h1>
+          </div>
           <div
             id="player2Options"
             class="d-flex flex-row justify-content-between"
@@ -190,9 +203,6 @@
       <!-- Footer section -->
       <footer class="bg-dark text-light py-3 mt-3 text-center">
         <p class="my-auto">&copy;Copyright</p>
-        <button type="button" class="btn btn-primary" onclick="leaveGame()">
-          Leave
-        </button>
       </footer>
     </div>
   </body>

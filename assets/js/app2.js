@@ -10,7 +10,7 @@ var config = {
 firebase.initializeApp(config);
 // database reference
 let database = firebase.database();
-// timer for playGame function
+// timer to display both players choice
 let timer = null;
 // user gets assigned values
 let player = {
@@ -25,7 +25,7 @@ let player = {
 
 $(document).ready(function() {
   $("#rpsGame").hide();
-  $("#h1").hide();
+  $("#header button, #header h1").hide();
 
   // click event on instructions container to play game.
   $("#playButton").on("click", function() {
@@ -43,18 +43,19 @@ $(document).ready(function() {
         database.ref("/player1/name").set(player.name);
         player.id = snapshot.val().player1.id;
         $("#instructions").hide();
-        $("h1").show();
+        $("#header button, #header h1").show();
         $("#rpsGame").show();
         $("#player2Options button").hide();
       } else if (snapshot.val().player2.name === "") {
         database.ref("/player2/name").set(player.name);
         player.id = snapshot.val().player2.id;
         $("#instructions").hide();
-        $("h1").show();
+        $("#header button, #header h1").show();
         $("#rpsGame").show();
         $("#player1Options button").hide();
       }
     });
+    $("#player1ChoiceContainer, #player2ChoiceContainer").hide();
   });
 
   // Player choice click event.
@@ -62,31 +63,16 @@ $(document).ready(function() {
     player.choice = $(this)
       .text()
       .trim();
-    $("#player1Options button, #player2Options button").hide();
     if (player.id === 1) {
       database.ref("/player1/choice").set(player.choice);
-      $("#player1Choice").show();
+      $("#player1Options button").hide();
+      $("#player1ChoiceContainer").show();
     } else if (player.id === 2) {
       database.ref("/player2/choice").set(player.choice);
-      $("#player2Choice").show();
+      $("#player2Options button").hide();
+      $("#player2ChoiceContainer").show();
     }
-    timer = setInterval(function() {
-      console.log("check");
-      database.ref().once("value", function(snapshot) {
-        if (
-          snapshot.val().player1.choice !== "" &&
-          snapshot.val().player2.choice !== ""
-        ) {
-          clearInterval(timer);
-          $("#player2Choice").show();
-          $("#player1Choice").show();
-          timer = setInterval(function() {
-            clearInterval(timer);
-            calculateWin();
-          }, 2000);
-        }
-      });
-    }, 1000);
+    calculateWin();
   });
 
   // Changes HTML based on database changes
@@ -94,24 +80,35 @@ $(document).ready(function() {
     $("#player1Name").text(snapshot.val().player1.name);
     $("#player1Wins").text(snapshot.val().player1.wins);
     $("#player1Losses").text(snapshot.val().player1.losses);
-    $("#player1Choice")
-      .text(snapshot.val().player1.choice)
-      .hide();
+    $("#player1Choice").text(snapshot.val().player1.choice);
     $("#player1Ties").text(snapshot.val().player1.ties);
 
     $("#player2Name").text(snapshot.val().player2.name);
     $("#player2Wins").text(snapshot.val().player2.wins);
     $("#player2Losses").text(snapshot.val().player2.losses);
-    $("#player2Choice")
-      .text(snapshot.val().player2.choice)
-      .hide();
+    $("#player2Choice").text(snapshot.val().player2.choice);
     $("#player2Ties").text(snapshot.val().player2.ties);
     $("#messages").prepend(snapshot.val().message);
+  });
+  // event handler for when player closes the browser.
+  $(window).on("beforeunload", function() {
+    if (player.id === 1) {
+      database.ref("/player1/name").set("");
+      database.ref("/player1/choice").set("");
+      database.ref("/player1/wins").set(0);
+      database.ref("/player1/losses").set(0);
+      database.ref("/player1/ties").set(0);
+    } else if (player.id === 2) {
+      database.ref("/player2/name").set("");
+      database.ref("/player2/choice").set("");
+      database.ref("/player2/wins").set(0);
+      database.ref("/player2/losses").set(0);
+      database.ref("/player2/ties").set(0);
+    }
   });
 });
 // Calculates who wins, who looses or if it was a tie.
 function calculateWin() {
-  console.log("Calculate Win Function");
   database.ref().once("value", function(snapshot) {
     let player1 = {
       choice: snapshot.val().player1.choice,
@@ -126,70 +123,78 @@ function calculateWin() {
       ties: snapshot.val().player2.ties
     };
 
-    if (player1.choice === "Rock" && player2.choice === "Scissors") {
-      player1.wins++;
-      player2.losses++;
-      database.ref("/player1/wins").set(player1.wins);
-      database.ref("/player2/losses").set(player2.losses);
-    } else if (player1.choice === "Rock" && player2.choice === "Paper") {
-      player1.losses++;
-      player2.wins++;
-      database.ref("/player1/losses").set(player1.losses);
-      database.ref("/player2/wins").set(player2.wins);
-    } 
-    // else if (player1.choice === "Rock" && player2.choice === "Rock") {
-    //   player1.ties++;
-    //   player2.ties++;
-    //   database.ref("/player1/ties").set(player1.ties);
-    //   database.ref("/player2/ties").set(player2.ties);
-    // } 
-    else if (player1.choice === "Paper" && player2.choice === "Rock") {
-      player1.wins++;
-      player2.losses++;
-      database.ref("/player1/wins").set(player1.wins);
-      database.ref("/player2/losses").set(player2.losses);
-    } else if (player1.choice === "Paper" && player2.choice === "Scissors") {
-      player1.losses++;
-      player2.wins++;
-      database.ref("/player1/losses").set(player1.losses);
-      database.ref("/player2/wins").set(player2.wins);
-    } 
-    // else if (player1.choice === "Paper" && player2.choice === "Paper") {
-    //   player1.ties++;
-    //   player2.ties++;
-    //   database.ref("/player1/ties").set(player1.ties);
-    //   database.ref("/player2/ties").set(player2.ties);
-    } else if (player1.choice === "Scissors" && player2.choice === "Paper") {
-      player1.wins++;
-      player2.losses++;
-      database.ref("/player1/wins").set(player1.wins);
-      database.ref("/player2/losses").set(player2.losses);
-    } else if (player1.choice === "Scissors" && player2.choice === "Rock") {
-      player1.losses++;
-      player2.wins++;
-      database.ref("/player1/losses").set(player1.losses);
-      database.ref("/player2/wins").set(player2.wins);
-     } 
-    //else if (player1.choice === "Scissors" && player2.choice === "Scissors") {
-    //   player1.ties++;
-    //   player2.ties++;
-    //   database.ref("/player1/ties").set(player1.ties);
-    //   database.ref("/player2/ties").set(player2.ties);
-    // }
-    else{
-      player1.ties++;
-      player2.ties++;
-      database.ref("/player1/ties").set(player1.ties);
-      database.ref("/player2/ties").set(player2.ties);
+    if (player1.choice !== "" && player2.choice !== "") {
+      $("#player2ChoiceContainer, #player1ChoiceContainer").show();
+      if (player1.choice === "Rock" && player2.choice === "Scissors") {
+        player1.wins++;
+        player2.losses++;
+        database.ref("/player1/wins").set(player1.wins);
+        database.ref("/player2/losses").set(player2.losses);
+      } else if (player1.choice === "Rock" && player2.choice === "Paper") {
+        player1.losses++;
+        player2.wins++;
+        database.ref("/player1/losses").set(player1.losses);
+        database.ref("/player2/wins").set(player2.wins);
+      } else if (player1.choice === "Paper" && player2.choice === "Rock") {
+        player1.wins++;
+        player2.losses++;
+        database.ref("/player1/wins").set(player1.wins);
+        database.ref("/player2/losses").set(player2.losses);
+      } else if (player1.choice === "Paper" && player2.choice === "Scissors") {
+        player1.losses++;
+        player2.wins++;
+        database.ref("/player1/losses").set(player1.losses);
+        database.ref("/player2/wins").set(player2.wins);
+      } else if (player1.choice === "Scissors" && player2.choice === "Paper") {
+        player1.wins++;
+        player2.losses++;
+        database.ref("/player1/wins").set(player1.wins);
+        database.ref("/player2/losses").set(player2.losses);
+      } else if (player1.choice === "Scissors" && player2.choice === "Rock") {
+        player1.losses++;
+        player2.wins++;
+        database.ref("/player1/losses").set(player1.losses);
+        database.ref("/player2/wins").set(player2.wins);
+      } else {
+        player1.ties++;
+        player2.ties++;
+        database.ref("/player1/ties").set(player1.ties);
+        database.ref("/player2/ties").set(player2.ties);
+      }
+      setTimeout(function() {
+        if (player.id === 1) {
+          $("#player1Options button").show();
+          database.ref("/player1/choice").set("");
+        } else if (player.id === 2) {
+          $("#player2Options button").show();
+          database.ref("/player2/choice").set("");
+        }
+        $("#player2ChoiceContainer, #player1ChoiceContainer").hide();
+      }, 3000);
+    } else {
+      timer = setInterval(function() {
+        database.ref().once("value", function(snapshot) {
+          if (
+            snapshot.val().player1.choice !== "" &&
+            snapshot.val().player2.choice !== ""
+          ) {
+            clearInterval(timer);
+            $("#player2ChoiceContainer, #player1ChoiceContainer").show();
+            setTimeout(function() {
+              if (player.id === 1) {
+                $("#player1Options button").show();
+                database.ref("/player1/choice").set("");
+              } else if (player.id === 2) {
+                $("#player2Options button").show();
+                database.ref("/player2/choice").set("");
+              }
+              $("#player2ChoiceContainer, #player1ChoiceContainer").hide();
+            }, 2000);
+          }
+        });
+      }, 1000);
     }
   });
-  database.ref("/player1/choice").set("");
-  database.ref("/player2/choice").set("");
-  if (player.id === 1) {
-    $("#player1Options button").show();
-  } else if (player.id === 2) {
-    $("#player2Options button").show();
-  }
 }
 
 function postMessage() {
@@ -219,7 +224,6 @@ function postMessage() {
 }
 // button for player to leave game
 function leaveGame() {
-  clearInterval(timer);
   $("#playerName").val("");
   if (player.id === 1) {
     database.ref("/player1/name").set("");
@@ -236,6 +240,6 @@ function leaveGame() {
   }
   database.ref("message").set("");
   $("#rpsGame").hide();
-  $("h1").hide();
+  $("#header button, #header h1").hide();
   $("#instructions").show();
 }
