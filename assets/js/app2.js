@@ -4,8 +4,7 @@ var config = {
   authDomain: "rps-multiplayer-99e63.firebaseapp.com",
   databaseURL: "https://rps-multiplayer-99e63.firebaseio.com",
   projectId: "rps-multiplayer-99e63",
-  storageBucket: "rps-multiplayer-99e63.appspot.com",
-  messagingSenderId: "863489482024"
+  storageBucket: "rps-multiplayer-99e63.appspot.com"
 };
 firebase.initializeApp(config);
 // database reference
@@ -75,7 +74,7 @@ $(document).ready(function() {
     calculateWin();
   });
 
-  // Changes HTML based on database changes
+  //Firebase listener for database changes updates HTML accordingly.
   database.ref().on("value", function(snapshot) {
     $("#player1Name").text(snapshot.val().player1.name);
     $("#player1Wins").text(snapshot.val().player1.wins);
@@ -90,7 +89,7 @@ $(document).ready(function() {
     $("#player2Ties").text(snapshot.val().player2.ties);
     $("#messages").prepend(snapshot.val().message);
   });
-  // event handler for when player closes the browser.
+  // event handler for when player closes the browser or refreshes page.
   $(window).on("beforeunload", function() {
     if (player.id === 1) {
       database.ref("/player1/name").set("");
@@ -107,7 +106,7 @@ $(document).ready(function() {
     }
   });
 });
-// Calculates who wins, who looses or if it was a tie.
+// Calculates who wins, who looses or if it was a tie. Doesn't calculate who won until both users have made a choice.
 function calculateWin() {
   database.ref().once("value", function(snapshot) {
     let player1 = {
@@ -196,7 +195,7 @@ function calculateWin() {
     }
   });
 }
-
+// posts users message to html document when send button is clicked.
 function postMessage() {
   player.message = $("#message").val();
   if (player.message === "") {
@@ -222,7 +221,7 @@ function postMessage() {
   }
   $("#message").val("");
 }
-// button for player to leave game
+// button for player to leave game, resets database users information was stored
 function leaveGame() {
   $("#playerName").val("");
   if (player.id === 1) {
