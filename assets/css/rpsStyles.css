@@ -4,6 +4,11 @@ body {
   width: 100%;
   overflow-x: hidden;
 }
+/* ================ Navbar & Footer styles ============== */
+nav,
+footer {
+  background-color: #333d51;
+}
 .container-fluid {
   min-height: calc(100% - 55px);
 }
